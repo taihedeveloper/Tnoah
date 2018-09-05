@@ -73,7 +73,7 @@ web平台包括三部分组成:
 * API接口(nginx+PHP)
 * 权限服务(nginx+lua)
 
-####前端&API接口部署 (npm环境依赖)
+__前端&API接口部署 (npm环境依赖)__
 部署流程：
 1、权限服务
 2、api
@@ -147,8 +147,8 @@ __[注]__ __是否添加权限只会决定用户是否拥有修改相应集群�
   
 ![proc1](doc/img/proc1.png )
 __[注]__ __进程配置需要配置进程的绝对路径&命令,例如:__
-~~nginx~~
-~~/home/work/odp/webserver/sbin/nginx -p /home/work/odp/webserver -c ./conf/nginx.conf~~ (这种"命令" + "参数" 的配置方式暂时不支持)
+nginx
+/home/work/odp/webserver/sbin/nginx -p /home/work/odp/webserver -c ./conf/nginx.conf
 /home/work/odp/webserver/sbin/nginx
   
   
