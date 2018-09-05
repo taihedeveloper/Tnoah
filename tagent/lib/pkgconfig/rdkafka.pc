@@ -1,0 +1,10 @@
+prefix=/usr/local/tagent/
+libdir=/usr/local/tagent/lib
+includedir=/user/local/tagent/include
+
+Name: librdkafka
+Description: The Apache Kafka C/C++ library
+Version: 0.11.1
+Cflags: -I${includedir}
+Libs: -L${libdir} -lrdkafka
+Libs.private: -lpthread -lz -lrt -ldl

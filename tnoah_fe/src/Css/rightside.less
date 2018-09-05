@@ -1,0 +1,92 @@
+@import "./mixin.less";
+
+.topbox {
+    select {
+        &.manage-select {
+            width: 15%;
+            background-position: 95% center;
+        }
+        &.red-input {
+            border: 1px solid #f00;
+            color: #f00;
+            option {
+                color: #000 ;
+            }
+        }
+    }
+    input {
+        &.manage-input {
+            width: 20%;
+            margin-top:5px;
+            margin-left: 0;
+        }
+    }
+    .input-idbox {
+        input[type="number"] {
+            -moz-appearance:textfield;
+            &::-webkit-outer-spin-button,&::-webkit-inner-spin-button{
+                -webkit-appearance: none !important;
+                margin: 0;
+            }
+        }
+    }
+
+    .box {
+        .subbox {
+            display: inline-block;
+            width: auto;
+            font-size:0;
+        }
+        button{
+            font-size: 13px;
+            display: inline-block;
+
+            margin-right: 10px;
+            padding: 0 20px;
+            &.blue-button{
+                boder: none;
+            }
+            &[disabled]{
+            }
+        }
+    }
+}
+.manageTop {
+/*    height: 50px;*/
+/*    line-height: 50px;*/
+    padding: 10px 20px;
+    background: @bgGray;
+    label {
+        font-size: 13px;
+    }
+    .nowrap {
+        label {
+            min-width: 50px;
+        }
+    }
+}
+.searchDetail {
+/*    padding: 5px 20px;*/
+/*    background: @bgGray;*/
+    position:relative;
+}
+.configList {
+    margin: 20px 0;
+    /*padding: 0 20px;*/
+
+    a {
+        color: @aColor;
+    }
+    
+    .button-area {
+        button {
+            margin-right: 10px;
+        }
+    }
+
+    table {
+        a {
+            margin: 0 2px;
+        }
+    }
+}

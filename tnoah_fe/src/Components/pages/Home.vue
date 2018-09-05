@@ -1,0 +1,1684 @@
+<template>
+	<div>
+		<div  v-if="showLeft">
+			<SideLeft></SideLeft>
+			<div class="sideleftShow">
+				<i class="el-icon-caret-left" @click="leftChange()" id="showLeft"></i>
+			</div>
+		</div>
+		<div v-else>
+			<div class="sideleftUnShow">
+				<i class="el-icon-caret-right" @click="leftChange()" id="showUnLeft"></i>
+			</div>
+		</div>
+		<div name="rightside" :class="showLeft?'homeLeftShow':'homeLeftUnShow'">
+			<div class="topbox">
+				<div class="selectbox" style="float:left">
+					<div class="title">机器
+					</div>
+					<div class="content">
+						<div class="contentHead clearfix">
+							<input type="text" id="searchMechine" v-model="mechineSearch" @keyup.enter="searchIp"><span id="searchM" @click="searchIp"></span>
+							<ul>
+								<li @click="checkten()">+10</li>
+								<li @click="checkall()">全选</li>
+								<li @click="uncheckips()">取消</li>
+								<li style="cursor:default;">{{selectIps.length}}/{{mechineTable.length}}</li>
+							</ul>
+						</div>
+						<div class="contentTable">
+							<table id="iiiiiiiiiiiiip">
+								<tbody>
+									<tr v-for="(value,index) in mechineTable">
+										<td style="width:2%"><input type="checkbox" name="check-ip" v-on:click="getParams()" :id="'ip'+index"></td>
+										<td style="width:10%"><label :for="'ip'+index">{{value.ip_addr}}</label></td>
+										<td style="width:20%"><label :for="'ip'+index">{{value.name}}</label></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+				<div class="selectbox" style="float:right">
+					<div class="title">监控项
+						<span class="itemOpertor">
+							<span style="margin-right:10px;">{{selectItems.length}}/all</span>
+							<span style="cursor:pointer;" @click="uncheckitems()">取消</span>
+						</span>
+						<input type="text" id="searchItem" v-model="metricSearch" @keyup.enter="searchItem"><span id="searchI" @click="searchItem"></span>
+					</div>
+					<div class="content">
+						<div class="contentHead clearfix">
+							<ul>
+								<li id="CPU" @click="getCpu()" v-show="cpuSearch">CPU</li>
+								<li id="MEM" @click="getMem()" v-show="memSearch">内存</li>
+								<li id="DISK" @click="getDisk()" v-show="diskSearch">磁盘空间</li>
+								<li id="DISK_IO" @click="getDiskIo()" v-show="diskioSearch">磁盘IO</li>
+								<li id="NET" @click="getNet()" v-show="netSearch">网卡IO</li>
+								<li id="PROCESS" @click="getProcess()" v-show="processSearch">进程</li>
+								<li id="BUSINESS" @click="getBusiness()" v-show="businessSearch">业务</li>
+								<li id="PORT" @click="getPort()" v-show="portSearch">端口</li>
+							</ul>
+						</div>
+						<div class="contentTable" v-show="currentItem=='CPU'">
+							<table >
+								<tbody>
+									<tr v-for="(value,index) in cpuItemTable">
+										<td style="width:2%"><input type="checkbox"  name="check-item" v-on:click="getParams()" :id="'cpu'+index"></td>
+										<td  style="width:12%" :title="value.name"><label :for="'cpu'+index">{{value.name}}</label></td>
+										<td  style="width:10%" :title="value.addi"><label :for="'cpu'+index">{{value.addi}}</label></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<div class="contentTable" v-show="currentItem=='MEM'">
+							<table >
+								<tbody>
+									<tr v-for="(value,index) in memItemTable">
+										<td style="width:2%"><input type="checkbox"  name="check-item" v-on:click="getParams()" :id="'mem'+index"></td>
+										<td  style="width:12%" :title="value.name"><label :for="'mem'+index">{{value.name}}</label></td>
+										<td  style="width:10%" :title="value.addi"><label :for="'mem'+index">{{value.addi}}</label></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<div class="contentTable" v-show="currentItem=='DISK'">
+							<table >
+								<tbody>
+									<tr v-for="(value,index) in diskItemTable">
+										<td style="width:2%"><input type="checkbox"  name="check-item" v-on:click="getParams()" :id="'disk'+index"></td>
+										<td  style="width:12%" :title="value.name"><label :for="'disk'+index">{{value.name}}</label></td>
+										<td  style="width:10%" :title="value.addi"><label :for="'disk'+index">{{value.addi}}</label></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<div class="contentTable" v-show="currentItem=='DISK_IO'">
+							<table >
+								<tbody>
+									<tr v-for="(value,index) in diskioItemTable">
+										<td style="width:2%"><input type="checkbox"  name="check-item" v-on:click="getParams()" :id="'diskIo'+index"></td>
+										<td  style="width:12%" :title="value.name"><label :for="'diskIo'+index">{{value.name}}</label></td>
+										<td  style="width:10%" :title="value.addi"><label :for="'diskIo'+index">{{value.addi}}</label></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<div class="contentTable" v-show="currentItem=='NET'">
+							<table >
+								<tbody>
+									<tr v-for="(value,index) in netItemTable">
+										<td style="width:2%"><input type="checkbox"  name="check-item" v-on:click="getParams()" :id="'net'+index"></td>
+										<td  style="width:12%" :title="value.name"><label :for="'net'+index">{{value.name}}</label></td>
+										<td  style="width:10%" :title="value.addi"><label :for="'net'+index">{{value.addi}}</label></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<div class="contentTable" v-show="currentItem=='PROCESS'">
+							<table >
+								<tbody>
+									<tr v-for="(value,index) in processItemTable">
+										<td style="width:2%"><input type="checkbox"  name="check-item" v-on:click="getParams()" :id="'process'+index"></td>
+										<td  style="width:12%" :title="value.name"><label :for="'process'+index">{{value.name}}</label></td>
+										<td  style="width:10%" :title="value.addi"><label :for="'process'+index">{{value.addi}}</label></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<div class="contentTable" v-show="currentItem=='BUSINESS'">
+							<table >
+								<tbody>
+									<tr v-for="(value,index) in businessItemTable">
+										<td style="width:2%"><input type="checkbox"  name="check-item" v-on:click="getParams()" :id="'business'+index"></td>
+										<td  style="width:12%" :title="value.name"><label :for="'business'+index">{{value.name}}</label></td>
+										<td  style="width:10%" :title="value.addi"><label :for="'business'+index">{{value.addi}}</label></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<div class="contentTable" v-show="currentItem=='PORT'">
+							<table >
+								<tbody>
+									<tr v-for="(value,index) in portItemTable">
+										<td style="width:2%"><input type="checkbox"  name="check-item" v-on:click="getParams()" :id="'port'+index"></td>
+										<td  style="width:12%" :title="value.name"><label :for="'port'+index">{{value.name}}</label></td>
+										<td  style="width:10%" :title="value.addi"><label :for="'port'+index">{{value.addi}}</label></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="graphbox" style="clear:both;">
+				<div class="boxHead">
+					<ul>
+						<li>趋势图</li>
+						<li>
+							<el-date-picker v-model="value1" type="datetime" placeholder="开始时间" @change="pickStartTime" :picker-options="pickerOption">
+	    					</el-date-picker>
+						</li>
+						-
+						<li>
+							<el-date-picker v-model="value2" type="datetime" placeholder="结束时间" @change="pickEndTime" :picker-options="pickerOption">
+	    					</el-date-picker>
+						</li>
+						<li id="oneHour" @click="setOneHour" class="cur">1小时</li>
+						<li id="oneDay" @click="setOneDay">1天</li>
+						<li id="threeDay" @click="setThreeDay">3天</li>
+						<li id="sevenDay" @click="setSevenDay">7天</li>
+						<li><button class="button" @click="sureClick()">确定</button></li>
+						<li><button class="button" @click="setOneHour()">取消</button></li>
+					</ul>
+				</div>
+			</div>
+			<div v-for="(item,index) in graphList">
+				<div class="graph">
+					<div class="graphHead" @click="closeGraph(index)"></div>
+					<div class="graphBody" :id="'graph'+item.index">
+						<div v-if="item.showLoading">
+							<img src="/dist/Image/loading.gif" class="loading">
+						</div>
+						<div v-else-if="item.showError">
+							<span class="error">未查到数据，如有疑问请联系tnoah维护人员</span>
+						</div>
+					</div>
+					<div class="graphFoot" v-if="!item.showLoading&!item.showError">
+						<div>`
+							<a href="javascript:;" @click="item.showdetails=!item.showdetails">查看详情</a>
+						</div>
+						<div v-if="item.showdetails">
+							<table>
+								<thead>
+									<tr>
+										<th width="40%" v-on:click="sortIp(item)">
+											<span style="cursor:pointer;">监控机器</span>
+											<span  v-show="item.ipSort=='down'"><i class="el-icon-caret-bottom"></i></span>
+											<span  v-show="item.ipSort=='up'"><i class="el-icon-caret-top"></i></span>
+										</th>
+										<th  width="20%" v-on:click="sortMax(item)">
+											<span style="cursor:pointer;">max</span>
+											<span  v-show="item.maxSort=='down'"><i class="el-icon-caret-bottom"></i></span>
+											<span  v-show="item.maxSort=='up'"><i class="el-icon-caret-top"></i></span>
+										</th>
+										<th  width="20%" v-on:click="sortMin(item)">
+											<span style="cursor:pointer;">min</span>
+											<span  v-show="item.minSort=='down'"><i class="el-icon-caret-bottom"></i></span>
+											<span  v-show="item.minSort=='up'"><i class="el-icon-caret-top"></i></span>
+										</th>
+										<th  width="20%" v-on:click="sortAvg(item)">
+											<span style="cursor:pointer;">avg</span>
+											<span  v-show="item.avgSort=='down'"><i class="el-icon-caret-bottom"></i></span>
+											<span  v-show="item.avgSort=='up'"><i class="el-icon-caret-top"></i></span>
+										</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr v-for="(sItem,index) in item.ipsData">
+										<td>
+											{{sItem.ip}}
+										</td>
+										<td>
+											{{sItem.max}}
+										</td>
+										<td>
+											{{sItem.min}}
+										</td>
+										<td>
+											{{sItem.avg}}
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</template>
+<script>
+import {mapGetters,mapActions} from 'vuex'
+import {DatePicker} from 'element-ui'
+import vueGetData from "../../Js/vueGetData.js"
+import echarts from "../../Js/plugins/echarts.js"
+import SideLeft from '../SideLeft.vue'
+
+	export default{
+		name:'home',
+		data () {
+			return {
+				showLeft:true,
+				mechineTable: [],
+				copyMechineTable:[],
+				mechineSearch:'',//搜索机器的ip or 名字
+				metricSearch:'',//搜索监控项
+				monitorItems:{},//存储某个机器下的所有监控项
+				currentItem:'CPU',//存储某个机器下的当前监控tag
+				cpuItemTable: [],//cpu tag下的监控项
+				copyCpuItemTable: [],//cpu tag下的监控项
+				cpuSearch:true,
+				memItemTable: [],//mem tag下的监控项
+				copyMemItemTable: [],//mem tag下的监控项
+				memSearch:true,
+				diskItemTable: [],//disk tag下的监控项
+				copyDiskItemTable: [],//disk tag下的监控项
+				diskSearch:true,
+				diskioItemTable: [],//diskio tag下的监控项
+				copyDiskioItemTable: [],//diskio tag下的监控项
+				diskioSearch:true,
+				netItemTable: [],//net tag下的监控项
+				copyNetItemTable: [],//net tag下的监控项
+				netSearch:true,
+				processItemTable: [],//process tag下的监控项
+				copyProcessItemTable: [],//process tag下的监控项
+				processSearch:true,
+				businessItemTable: [],//business tag下的监控项
+				copyBusinessItemTable: [],//business tag下的监控项
+				businessSearch:true,
+				portItemTable: [],//port tag下的监控项
+				copyPortItemTable: [],//port tag下的监控项
+				portSearch:true,
+				value1:'',//开始时间的日期形式
+				value2:'',//结束时间的日期形式
+				startTime:'',//开始时间的时间戳形式
+				endTime:'',//结束时间的时间戳形式
+				currentTime:'oneHour',//存储当前时间快捷方式
+				selectIps:[],
+				selectMechines:[],
+				selectItems:[],
+				params:{
+				},
+				graphList:[],
+				pickerOption:{
+					disabledDate(time) {
+						let curDate = (new Date()).getTime();
+						let two = 60 * 24 * 3600 * 1000;
+			            let twoMonths = curDate - two;
+			            return time.getTime() > Date.now();
+					}
+				},
+				ipSort:'none',
+				maxSort:'none',
+				minSort:'none',
+				avgSort:'none',
+			}
+		},
+		computed:mapGetters({
+			treeId:"treeId",
+		}),
+		watch:{
+			treeId: function(){
+				//取消已选项
+				this.uncheckips();
+				this.mechineSearch="";
+				this.metricSearch="";
+
+				var items=document.getElementsByName("check-item");
+                var len=items.length;
+                if(len>0){
+                	for(var i=0;i<len;i++){
+                		items[i].checked=false;
+                	}
+                }
+				let data = {"group_id":this.treeId}
+				vueGetData.getData("getmachineinfos",data,function(jsondata){
+		        	if(jsondata.body.error_code === 22000){
+		        		this.mechineTable = jsondata.body.data;
+		        		this.copyMechineTable = jsondata.body.data;
+		        	}else{
+		        		this.mechineTable = [];
+		        		this.copyMechineTable = [];
+		        	}
+		        }.bind(this),function(){
+
+		        }.bind(this));
+				//获取采集项
+		        vueGetData.getData("getgroupmetricsname",data,function(jsondata){
+		        	if(jsondata.body.error_code === 22000){
+		        		let json = jsondata.body.data;
+		        		for(var item in json){
+		        			this.cpuSearch = true;
+		        			this.memSearch = true;
+		        			this.diskSearch = true;
+		        			this.diskioSearch = true;
+		        			this.netSearch = true;
+		        			this.netSearch = true;
+		        			this.businessSearch = true;
+		        			this.portSearch = true;
+		        			if(item == 'CPU'){
+		        				this.cpuItemTable = json[item];
+		        				this.copyCpuItemTable = json[item];
+		        			}else if(item == 'MEM'){
+		        				this.memItemTable = json[item];
+		        				this.copyMemItemTable = json[item];
+		        			}else if(item == 'DISK'){
+		        				this.diskItemTable = json[item];
+		        				this.copyDiskItemTable = json[item];
+		        			}else if(item == 'DISK_IO'){
+		        				this.diskioItemTable = json[item];
+		        				this.copyDiskioItemTable = json[item];
+		        			}else if(item == 'NET'){
+		        				this.netItemTable = json[item];
+		        				this.copyNetItemTable = json[item];
+		        			}else if(item == 'PROCESS'){
+		        				this.processItemTable = json[item];
+		        				this.copyProcessItemTable = json[item];
+		        			}else if(item == 'BUSINESS'){
+		        				this.businessItemTable = json[item];
+		        				this.copyBusinessItemTable = json[item];
+		        			}else if(item == 'PORT'){
+		        				this.portItemTable = json[item];
+		        				this.copyPortItemTable = json[item];
+		        			}
+	        			}
+
+		        		//-------------------------------------
+	        			// for(var item in json){
+	        			// 	this.monitorItems[item]=json[item];
+	        			// }
+	        			document.getElementById(this.currentItem).setAttribute("class","")
+	        			this.currentItem='CPU';
+	        			// this.monitorItemTable=json[this.currentItem]
+	        			document.getElementById(this.currentItem).setAttribute("class","cur")
+	        			//-------------------------------------
+		        	}
+		        }.bind(this),function(){
+
+		        }.bind(this));
+			},
+		},
+		methods: {
+			sortIp:function(datas){
+				if(datas.ipSort!='down'){
+					//默认降序排列
+					function compareUp(ipBegin, ipEnd)
+				    {
+				        var temp1;
+				        var temp2;
+				        temp1 = ipBegin.ip.split(".");
+				        temp2 = ipEnd.ip.split(".");
+				        for (var i = 0; i < 4; i++)
+				        {
+				            if (temp1[i]>temp2[i])
+				            {
+				                return 1;
+				            }
+				            else if (temp1[i]<temp2[i])
+				            {
+				                return -1;
+				            }
+				        }
+				        return 0;
+				    }
+					datas.ipsData.sort(compareUp)
+					datas.ipSort='down';
+					datas.maxSort='none';
+					datas.minSort='none';
+					datas.avgSort='none';
+				}else{
+					function compareDown(ipBegin, ipEnd)
+				    {
+				        var temp1;
+				        var temp2;
+				        temp1 = ipBegin.ip.split(".");
+				        temp2 = ipEnd.ip.split(".");
+				        for (var i = 0; i < 4; i++)
+				        {
+				            if (temp1[i]>temp2[i])
+				            {
+				                return -1;
+				            }
+				            else if (temp1[i]<temp2[i])
+				            {
+				                return 1;
+				            }
+				        }
+				        return 0;
+				    }
+					datas.ipsData.sort(compareDown)
+					datas.ipSort='up';
+					datas.maxSort='none';
+					datas.minSort='none';
+					datas.avgSort='none';
+				}
+			},
+			sortMax:function(datas){
+				if(datas.maxSort!='down'){
+					//默认降序排列
+					function compare(a, b)
+				    {
+				        return a.max-b.max;
+				    }
+					datas.ipsData.sort(compare)
+					datas.ipSort='none';
+					datas.maxSort='down';
+					datas.minSort='none';
+					datas.avgSort='none';
+				}else{
+					function compare(a, b)
+				    {
+				        return b.max-a.max;
+				    }
+					datas.ipsData.sort(compare)
+					datas.ipSort='none';
+					datas.maxSort='up';
+					datas.minSort='none';
+					datas.avgSort='none';
+				}
+			},
+			sortMin:function(datas){
+				if(datas.minSort!='down'){
+					//默认降序排列
+					function compare(a, b)
+				    {
+				        return a.min-b.min;
+				    }
+					datas.ipsData.sort(compare)
+					datas.ipSort='none';
+					datas.maxSort='none';
+					datas.minSort='down';
+					datas.avgSort='none';
+				}else{
+					function compare(a, b)
+				    {
+				        return b.min-a.min;
+				    }
+					datas.ipsData.sort(compare)
+					datas.ipSort='none';
+					datas.maxSort='none';
+					datas.minSort='up';
+					datas.avgSort='none';
+				}
+			},
+			sortAvg:function(datas){
+				if(datas.avgSort!='down'){
+					//默认降序排列
+					function compare(a, b)
+				    {
+				        return a.avg-b.avg;
+				    }
+					datas.ipsData.sort(compare)
+					datas.ipSort='none';
+					datas.maxSort='none';
+					datas.minSort='none';
+					datas.avgSort='down';
+				}else{
+					function compare(a, b)
+				    {
+				        return b.avg-a.avg;
+				    }
+					datas.ipsData.sort(compare)
+					datas.ipSort='none';
+					datas.maxSort='none';
+					datas.minSort='none';
+					datas.avgSort='up';
+				}
+			},
+			leftChange:function(){
+				this.showLeft = !this.showLeft;
+				let _this = this;
+				setTimeout(function (){
+					if(_this.graphList.length>0){
+						for(let i=0;i<_this.graphList.length;i++){
+							_this.graphList[i].chart.resize();
+						}
+					}
+				}
+				,10);//延时
+			},
+			searchIp:function(){
+				if(!this.treeId){
+					vueGetData.creatTips("请选择集群");
+					return false;
+				}
+				this.mechineSearch = vueGetData.trim(this.mechineSearch)
+				if(this.mechineSearch==''){
+					this.mechineTable = this.copyMechineTable;
+				}else{
+					var tempTable = [];
+					for(let i=0;i<this.copyMechineTable.length;i++){
+						if(this.copyMechineTable[i]["ip_addr"].indexOf(this.mechineSearch)>=0 || this.copyMechineTable[i]["name"].indexOf(this.mechineSearch)>=0){
+							tempTable.push(this.copyMechineTable[i])
+						}
+					}
+					this.mechineTable=tempTable;
+				}
+
+				let _this = this;
+				setTimeout(function (){
+					for(let i=0;i<_this.mechineTable.length;i++){
+						var item=document.getElementById("ip"+i);
+						item.checked=false;
+					}
+					for(let i=0;i<_this.selectIps.length;i++){
+						for(let j=0;j<_this.mechineTable.length;j++){
+							var item=document.getElementById("ip"+j);
+							if(_this.mechineTable[j]["ip_addr"] == _this.selectIps[i]){
+								item.checked=true;
+							}
+						}
+					}
+				}
+				,10);
+			},
+			searchItem:function(){
+				if(!this.treeId){
+					vueGetData.creatTips("请选择集群");
+					return false;
+				}
+				this.metricSearch = vueGetData.trim(this.metricSearch)
+				if(this.metricSearch==''){
+					document.getElementById(this.currentItem).setAttribute("class","")
+					this.currentItem='CPU';
+					document.getElementById(this.currentItem).setAttribute("class","cur")
+					this.cpuItemTable = this.copyCpuItemTable;
+					this.cpuSearch = true;
+					this.memItemTable = this.copyMemItemTable;
+					this.memSearch = true;
+					this.diskItemTable = this.copyDiskItemTable;
+					this.diskSearch = true;
+					this.diskioItemTable = this.copyDiskioItemTable;
+					this.diskioSearch = true;
+					this.netItemTable = this.copyNetItemTable;
+					this.netSearch = true;
+					this.processItemTable = this.copyProcessItemTable;
+					this.processSearch = true;
+					this.businessItemTable = this.copyBusinessItemTable;
+					this.businessSearch = true;
+					this.portItemTable = this.copyPortItemTable;
+					this.portSearch = true;
+				}else{
+					if(this.currentItem!=''){
+						document.getElementById(this.currentItem).setAttribute("class","")
+					}
+					let tempItem = false;
+					this.currentItem='';
+					let tempTable = [];
+					for(let i=0;i<this.copyPortItemTable.length;i++){
+						if(this.copyPortItemTable[i]["name"].toLowerCase().indexOf(this.metricSearch.toLowerCase())>=0){
+							tempTable.push(this.copyPortItemTable[i])
+						}
+					}
+					if(tempTable.length>0){
+						this.currentItem='PORT';
+						this.portItemTable = tempTable;
+						this.portSearch = true;
+						tempItem = true;
+					}else{
+						this.portSearch = false;
+					}
+					tempTable = [];
+					for(let i=0;i<this.copyBusinessItemTable.length;i++){
+						if(this.copyBusinessItemTable[i]["name"].toLowerCase().indexOf(this.metricSearch.toLowerCase())>=0){
+							tempTable.push(this.copyBusinessItemTable[i])
+						}
+					}
+					if(tempTable.length>0){
+						this.currentItem='BUSINESS';
+						this.businessItemTable = tempTable;
+						this.businessSearch = true;
+						tempItem = true;
+					}else{
+						this.businessSearch = false;
+					}
+					tempTable = [];
+					for(let i=0;i<this.copyProcessItemTable.length;i++){
+						if(this.copyProcessItemTable[i]["name"].toLowerCase().indexOf(this.metricSearch.toLowerCase())>=0){
+							tempTable.push(this.copyProcessItemTable[i])
+						}
+					}
+					if(tempTable.length>0){
+						this.currentItem='PROCESS';
+						this.processItemTable = tempTable;
+						this.processSearch = true;
+						tempItem = true;
+					}else{
+						this.processSearch = false;
+					}
+					tempTable = [];
+					for(let i=0;i<this.copyNetItemTable.length;i++){
+						if(this.copyNetItemTable[i]["name"].toLowerCase().indexOf(this.metricSearch.toLowerCase())>=0){
+							tempTable.push(this.copyNetItemTable[i])
+						}
+					}
+					if(tempTable.length>0){
+						this.currentItem='NET';
+						this.netItemTable = tempTable;
+						this.netSearch = true;
+						tempItem = true;
+					}else{
+						this.netSearch = false;
+					}
+					tempTable = [];
+					for(let i=0;i<this.copyDiskioItemTable.length;i++){
+						if(this.copyDiskioItemTable[i]["name"].toLowerCase().indexOf(this.metricSearch.toLowerCase())>=0){
+							tempTable.push(this.copyDiskioItemTable[i])
+						}
+					}
+					if(tempTable.length>0){
+						this.currentItem='DISK_IO';
+						this.diskioItemTable = tempTable;
+						this.diskioSearch = true;
+						tempItem = true;
+					}else{
+						this.diskioSearch = false;
+					}
+					tempTable = [];
+					for(let i=0;i<this.copyDiskItemTable.length;i++){
+						if(this.copyDiskItemTable[i]["name"].toLowerCase().indexOf(this.metricSearch.toLowerCase())>=0){
+							tempTable.push(this.copyDiskItemTable[i])
+						}
+					}
+					if(tempTable.length>0){
+						this.currentItem='DISK';
+						this.diskItemTable = tempTable;
+						this.diskSearch = true;
+						tempItem = true;
+					}else{
+						this.diskSearch = false;
+					}
+					tempTable = [];
+					for(let i=0;i<this.copyMemItemTable.length;i++){
+						if(this.copyMemItemTable[i]["name"].toLowerCase().indexOf(this.metricSearch.toLowerCase())>=0){
+							tempTable.push(this.copyMemItemTable[i])
+						}
+					}
+					if(tempTable.length>0){
+						this.currentItem='MEM';
+						this.memItemTable = tempTable;
+						this.memSearch = true;
+						tempItem = true;
+					}else{
+						this.memSearch = false;
+					}
+					tempTable = [];
+					for(let i=0;i<this.copyCpuItemTable.length;i++){
+						if(this.copyCpuItemTable[i]["name"].toLowerCase().indexOf(this.metricSearch.toLowerCase())>=0){
+							tempTable.push(this.copyCpuItemTable[i])
+						}
+					}
+					if(tempTable.length>0){
+						this.currentItem='CPU';
+						this.cpuItemTable = tempTable;
+						this.cpuSearch = true;
+						tempItem = true;
+					}else{
+						this.cpuSearch = false;
+					}
+
+					if(!tempItem){
+						vueGetData.creatTips("该监控项不存在");
+						this.currentItem='CPU';
+						document.getElementById(this.currentItem).setAttribute("class","cur")
+						this.cpuItemTable = [];
+						this.cpuSearch = true;
+						this.memItemTable = [];
+						this.memSearch = true;
+						this.diskItemTable = [];
+						this.diskSearch = true;
+						this.diskioItemTable = [];
+						this.diskioSearch = true;
+						this.netItemTable = [];
+						this.netSearch = true;
+						this.processItemTable = [];
+						this.processSearch = true;
+						this.businessItemTable = [];
+						this.businessSearch = true;
+						this.portItemTable = [];
+						this.portSearch = true;
+					}else{
+						document.getElementById(this.currentItem).setAttribute("class","cur")
+					}
+				}
+
+				let _this = this;
+
+				setTimeout(function (){
+					//
+					var items=document.getElementsByName("check-item");
+	                var len=items.length;
+	                if(len>0){
+	                	for(var i=0;i<len;i++){
+	                		items[i].checked=false;
+	                	}
+	                }
+					//
+					for(let i=0;i<_this.selectItems.length;i++){
+						for(let j=0;j<_this.portItemTable.length;j++){
+							var item=document.getElementById("port"+j);
+							if(_this.portItemTable[j]["name"] == _this.selectItems[i]){
+								item.checked=true;
+								continue;
+							}
+						}
+						for(let j=0;j<_this.businessItemTable.length;j++){
+							var item=document.getElementById("business"+j);
+							if(_this.businessItemTable[j]["name"] == _this.selectItems[i]){
+								item.checked=true;
+								continue;
+							}
+						}
+						for(let j=0;j<_this.processItemTable.length;j++){
+							var item=document.getElementById("process"+j);
+							if(_this.processItemTable[j]["name"] == _this.selectItems[i]){
+								item.checked=true;
+								continue;
+							}
+						}
+						for(let j=0;j<_this.netItemTable.length;j++){
+							var item=document.getElementById("net"+j);
+							if(_this.netItemTable[j]["name"] == _this.selectItems[i]){
+								item.checked=true;
+								continue;
+							}
+						}
+						for(let j=0;j<_this.diskioItemTable.length;j++){
+							var item=document.getElementById("diskIo"+j);
+							if(_this.diskioItemTable[j]["name"] == _this.selectItems[i]){
+								item.checked=true;
+								continue;
+							}
+						}
+						for(let j=0;j<_this.diskItemTable.length;j++){
+							var item=document.getElementById("disk"+j);
+							if(_this.diskItemTable[j]["name"] == _this.selectItems[i]){
+								item.checked=true;
+								continue;
+							}
+						}
+						for(let j=0;j<_this.memItemTable.length;j++){
+							var item=document.getElementById("mem"+j);
+							if(_this.memItemTable[j]["name"] == _this.selectItems[i]){
+								item.checked=true;
+								continue;
+							}
+						}
+						for(let j=0;j<_this.cpuItemTable.length;j++){
+							var item=document.getElementById("cpu"+j);
+							if(_this.cpuItemTable[j]["name"] == _this.selectItems[i]){
+								item.checked=true;
+								continue;
+							}
+						}
+					}
+				}
+				,10);
+			},
+			checkten:function(){
+				var ips=document.getElementsByName("check-ip");
+                var len=ips.length;
+                if(len>10){
+                	for(var i=0;i<10;i++){
+                		ips[i].checked=true;
+                	}
+                }else{
+                	for(var i=0;i<len;i++){
+                		ips[i].checked=true;
+                	}
+                }
+                this.getParams()
+			},
+			checkall:function(){
+                var ips=document.getElementsByName("check-ip");
+                var len=ips.length;
+                if(len>0){
+                	for(var i=0;i<len;i++){
+                		ips[i].checked=true;
+                	}
+                }
+                this.getParams()
+			},
+			uncheckips:function(){
+                var ips=document.getElementsByName("check-ip");
+                var len=ips.length;
+                if(len>0){
+                	for(var i=0;i<len;i++){
+                		ips[i].checked=false;
+                	}
+                }
+                this.getParams()
+			},
+			uncheckitems:function(){
+                var items=document.getElementsByName("check-item");
+                var len=items.length;
+                if(len>0){
+                	for(var i=0;i<len;i++){
+                		items[i].checked=false;
+                	}
+                }
+                this.getParams()
+			},
+			getCpu:function(){
+				document.getElementById(this.currentItem).setAttribute("class","")
+				this.currentItem='CPU';
+    			// this.monitorItemTable=this.monitorItems[this.currentItem]
+    			document.getElementById(this.currentItem).setAttribute("class","cur")
+    			// this.uncheckitems();
+			},
+			getMem:function(){
+				document.getElementById(this.currentItem).setAttribute("class","")
+				this.currentItem='MEM';
+    			// this.monitorItemTable=this.monitorItems[this.currentItem]
+    			document.getElementById(this.currentItem).setAttribute("class","cur")
+    			// this.uncheckitems();
+			},
+			getDisk:function(){
+				document.getElementById(this.currentItem).setAttribute("class","")
+				this.currentItem='DISK';
+    			// this.monitorItemTable=this.monitorItems[this.currentItem]
+    			document.getElementById(this.currentItem).setAttribute("class","cur")
+    			// this.uncheckitems();
+			},
+			getDiskIo:function(){
+				document.getElementById(this.currentItem).setAttribute("class","")
+				this.currentItem='DISK_IO';
+    			// this.monitorItemTable=this.monitorItems[this.currentItem]
+    			document.getElementById(this.currentItem).setAttribute("class","cur")
+    			// this.uncheckitems();
+			},
+			getNet:function(){
+				document.getElementById(this.currentItem).setAttribute("class","")
+				this.currentItem='NET';
+    			// this.monitorItemTable=this.monitorItems[this.currentItem]
+    			document.getElementById(this.currentItem).setAttribute("class","cur")
+    			// this.uncheckitems();
+			},
+			getProcess:function(){
+				document.getElementById(this.currentItem).setAttribute("class","")
+				this.currentItem='PROCESS';
+    			// this.monitorItemTable=this.monitorItems[this.currentItem]
+    			document.getElementById(this.currentItem).setAttribute("class","cur")
+    			// this.uncheckitems();
+			},
+			getBusiness:function(){
+				document.getElementById(this.currentItem).setAttribute("class","")
+				this.currentItem='BUSINESS';
+    			// this.monitorItemTable=this.monitorItems[this.currentItem]
+    			document.getElementById(this.currentItem).setAttribute("class","cur")
+    			// this.uncheckitems();
+			},
+			getPort:function(){
+				document.getElementById(this.currentItem).setAttribute("class","")
+				this.currentItem='PORT';
+    			// this.monitorItemTable=this.monitorItems[this.currentItem]
+    			document.getElementById(this.currentItem).setAttribute("class","cur")
+    			// this.uncheckitems();
+			},
+			pickStartTime:function(){
+				this.startTime=Date.parse(this.value1)/1000;
+			},
+			pickEndTime:function(){
+				this.endTime=Date.parse(this.value2)/1000;
+			},
+			setOneHour:function(){
+				document.getElementById(this.currentTime).setAttribute("class","")
+				this.currentTime='oneHour';
+    			document.getElementById(this.currentTime).setAttribute("class","cur")
+    			//获取当前时间
+				this.endTime = Date.parse(new Date())/1000;
+				this.value2 = this.getFormatDate(this.endTime)
+				this.startTime = Date.parse(new Date())/1000-3600;
+				this.value1 = this.getFormatDate(this.startTime)
+				this.getParams();
+			},
+			setOneDay:function(){
+				document.getElementById(this.currentTime).setAttribute("class","")
+				this.currentTime='oneDay';
+    			document.getElementById(this.currentTime).setAttribute("class","cur")
+    			//获取当前时间
+				this.endTime = Date.parse(new Date())/1000;
+				this.value2 = this.getFormatDate(this.endTime)
+				this.startTime = Date.parse(new Date())/1000-86400;
+				this.value1 = this.getFormatDate(this.startTime)
+				this.getParams();
+			},
+			setThreeDay:function(){
+				document.getElementById(this.currentTime).setAttribute("class","")
+				this.currentTime='threeDay';
+    			document.getElementById(this.currentTime).setAttribute("class","cur")
+    			//获取当前时间
+    			this.endTime = Date.parse(new Date())/1000;
+				this.value2 = this.getFormatDate(this.endTime)
+				this.startTime = Date.parse(new Date())/1000-259200;
+				this.value1 = this.getFormatDate(this.startTime)
+				this.getParams();
+			},
+			setSevenDay:function(){
+				document.getElementById(this.currentTime).setAttribute("class","")
+				this.currentTime='sevenDay';
+    			document.getElementById(this.currentTime).setAttribute("class","cur")
+    			//获取当前时间
+    			this.endTime = Date.parse(new Date())/1000;
+				this.value2 = this.getFormatDate(this.endTime)
+				this.startTime = Date.parse(new Date())/1000-604800;
+				this.value1 = this.getFormatDate(this.startTime)
+				this.getParams();
+			},
+			getParams:function(){
+				this.graphList=[]
+
+				//获取监控项个数
+				this.selectItems=[];
+				this.selectIps=[];
+				this.selectMechines=[];
+				var items=document.getElementsByName("check-item");
+				var itemLen=items.length;
+
+				if(itemLen>0){
+                	for(var i=0;i<itemLen;i++){
+                		if(items[i].checked){
+                			var row = items[i].parentNode.parentNode;
+                			var content=vueGetData.trim(row.cells[1].innerText);
+                			this.selectItems.push(content)
+                		}
+                	}
+                }
+                //获取机器ips
+                var ips=document.getElementsByName("check-ip");
+				var ipLen=ips.length;
+				if(ipLen>0){
+                	//检查是否选择ip
+                	for(var i=0;i<ipLen;i++){
+                		if(ips[i].checked){
+                			var row = ips[i].parentNode.parentNode;
+                			var content=vueGetData.trim(row.cells[1].innerText);
+                			this.selectIps.push(content);
+                			this.selectMechines.push(content+" ("+vueGetData.trim(row.cells[2].innerText)+")")
+                		}
+                	}
+                }
+                //数组方法
+                if(this.selectItems.length>0 & this.selectIps.length>0){
+                	for(var i=0;i<this.selectItems.length;i++){
+                		let tempObject={"index":i,"showLoading":true,"showError":false,"showdetails":false,"ipsData":[],"ipSort":'none',"maxSort":'none',"minSort":'none',"avgSort":'none'}
+                		this.graphList.push(tempObject);
+                		this.drawGraph(tempObject)
+                	}
+                	// for(var i=0;i<this.selectItems.length;i++){
+                	// 	this.drawGraph(i)
+                	// }
+                }
+			},
+			drawGraph:function(tempObject){
+				let index = tempObject.index;
+				let showLoading = tempObject.showLoading;
+
+				let ips=this.selectIps[0];
+				for(var i=1;i<this.selectIps.length;i++){
+					ips += ","+this.selectIps[i];
+				}
+
+				let data={
+					"starttime" : this.startTime,
+					"endtime" : this.endTime,
+					"ips" : ips,
+					"cols" : this.selectItems[index],
+					"pid": this.treeId
+					//"pid": "7"
+				}
+
+				if(this.endTime-this.startTime<=14400){//0-4h:10s
+					data["type"]='sec';
+				}else if(this.endTime-this.startTime>14400 && this.endTime-this.startTime<=43200){//4h-12h:1min
+					data["type"]='min';
+					data["type_num"] = '1';
+				}else if(this.endTime-this.startTime>43200 && this.endTime-this.startTime<=64800){//12h-18h:2min
+					data["type"]='min';
+					data["type_num"] = '2';
+				}else if(this.endTime-this.startTime>64800 && this.endTime-this.startTime<=86400){//18h-24h:3min
+					data["type"]='min';
+					data["type_num"] = '3';
+				}else if(this.endTime-this.startTime>86400 && this.endTime-this.startTime<=108000){//24h-30h:4min
+					data["type"]='min';
+					data["type_num"] = '4';
+				}else if(this.endTime-this.startTime>108000 && this.endTime-this.startTime<=129600){//30h-36h:5min
+					data["type"]='min';
+					data["type_num"] = '5';
+				}else if(this.endTime-this.startTime>129600 && this.endTime-this.startTime<=158400){//36h-44h:6min
+					data["type"]='min';
+					data["type_num"] = '6';
+				}else if(this.endTime-this.startTime>158400 && this.endTime-this.startTime<=187200){//44h-52h:7min
+					data["type"]='min';
+					data["type_num"] = '7';
+				}else if(this.endTime-this.startTime>187200 && this.endTime-this.startTime<=216000){//52h-60h:8min
+					data["type"]='min';
+					data["type_num"] = '8';
+				}else if(this.endTime-this.startTime>216000 && this.endTime-this.startTime<=244800){//60h-68h:9min
+					data["type"]='min';
+					data["type_num"] = '9';
+				}else if(this.endTime-this.startTime>244800 && this.endTime-this.startTime<=518400){//68h-144h:10min
+					data["type"]='min';
+					data["type_num"] = '10';
+				}else if(this.endTime-this.startTime>518400 && this.endTime-this.startTime<=777600){//144h-216h:20min
+					data["type"]='min';
+					data["type_num"] = '20';
+				}else if(this.endTime-this.startTime>777600 && this.endTime-this.startTime<=1036800){//216h-288h:30min
+					data["type"]='min';
+					data["type_num"] = '30';
+				}else if(this.endTime-this.startTime>1036800 && this.endTime-this.startTime<=1296000){//288h-360h:40min
+					data["type"]='min';
+					data["type_num"] = '40';
+				}else if(this.endTime-this.startTime>1296000 && this.endTime-this.startTime<=1555200){//360h-432h:50min
+					data["type"]='min';
+					data["type_num"] = '50';
+				}else if(this.endTime-this.startTime>1555200 && this.endTime-this.startTime<=3110400){//432h-864h:1h
+					data["type"]='min';
+					data["type_num"] = '60';
+				}else if(this.endTime-this.startTime>3110400 && this.endTime-this.startTime<=5184000){//864h-1440h:2h
+					data["type"]='min';
+					data["type_num"] = '120';
+				}else{
+					data["type"]='hour';
+				}
+
+				vueGetData.getData("gethbasedata",data,function(jsondata){
+					if(jsondata.body.length==0){
+						tempObject.showLoading=false;
+						tempObject.showError=true;
+					}else{
+						//**************获取折线图纵坐标数据*********************
+						var ips=[];
+						let yData = [];
+
+						for (var i=0;i<this.selectIps.length;i++){
+							//对应ip
+							var ip=this.selectIps[i];
+							//ip对应接口数据
+							let resultData = jsondata.body[this.selectItems[index]];
+							if(resultData[ip]){
+								//接口数据转换为数组形式
+								let tempY = [];
+								let maxNum = -Infinity;
+								let minNum = Infinity;
+								let sumNum = 0;
+								for(var item in resultData[ip]){
+									var d = new Date(item * 1000);
+									tempY.push([d,parseFloat(resultData[ip][item])])
+
+									//求最大值
+									resultData[ip][item] > maxNum ? maxNum = resultData[ip][item] : null;
+									//求最小值
+									resultData[ip][item] < minNum ? minNum = resultData[ip][item] : null;
+									//求平均值
+									sumNum += resultData[ip][item];
+								}
+
+								let avgNum = Math.round(sumNum/Object.keys(resultData[ip]).length*100)/100;
+								let ipData={"ip":ip,"max":Math.round(maxNum*100)/100,"min":Math.round(minNum*100)/100,"avg":avgNum}
+								tempObject.ipsData.push(ipData)
+
+								//图标读取数据
+								let tempData={
+									name: this.selectMechines[i],
+							        type: 'line',
+							        symbol:'none',
+							        data:tempY,
+							        itemStyle:{
+							        	normal:{
+							        		lineStyle:{
+							        			width:1
+							        		}
+							        	}
+							        }
+								}
+								yData.push(tempData)
+							}
+						}
+						tempObject.showLoading=false;
+						var id = 'graph'+index;
+						var myChart = echarts.init(document.getElementById(id));
+
+						var option = {
+					        title: {
+						        text: this.selectItems[index],
+						        x:'center',
+						        y:'top'
+						    },
+						    tooltip: {
+						        trigger: 'axis',
+						        position: function (pos, params, dom, rect, size) {
+									// 鼠标在左侧时 tooltip 显示到右侧，鼠标在右侧时 tooltip 显示到左侧。
+									var obj = {top: 10};
+									obj[['left', 'right'][+(pos[0] < size.viewSize[0] / 2)]] = 5;
+									return obj;
+								},
+						        formatter: function (params, ticket, callback) {
+						          var htmlStr = '';
+						          for(var i=0;i<params.length;i++){
+						        	var param = params[i];
+						        	var xName = param.axisValue;//x轴的名称
+						        	var seriesName = param.seriesName;//图例名称
+						        	var value = param.value;//y轴值
+						        	var color = param.color;//图例颜色
+						        	if(i===0){
+						        		var date = new Date();
+									    date.setTime(xName);
+									    var y = date.getFullYear();
+									    var m = date.getMonth() + 1;
+									    m = m < 10 ? ('0' + m) : m;
+									    var d = date.getDate();
+									    d = d < 10 ? ('0' + d) : d;
+									    var h = date.getHours();
+									    h = h < 10 ? ('0' + h) : h;
+									    var minute = date.getMinutes();
+									    var second = date.getSeconds();
+									    minute = minute < 10 ? ('0' + minute) : minute;
+									    second = second < 10 ? ('0' + second) : second;
+									    let currentdate = y + '-' + m + '-' + d+' '+h+':'+minute+':'+second;
+						        	    htmlStr += currentdate + '<br/>';//x轴的名称
+						        	}
+						        	htmlStr +='<div>';
+						        	//为了保证和原来的效果一样，这里自己实现了一个点的效果
+						        	htmlStr += '<span style="margin-right:5px;display:inline-block;width:10px;height:10px;border-radius:5px;background-color:'+color+';"></span>';
+						        	//圆点后面显示的文本
+						        	htmlStr += seriesName + '：' + value[1];
+						        	htmlStr += '</div>';
+						          }
+						          return htmlStr;
+						         }
+						    },
+						    dataZoom:{
+						    	type:'slider',
+						    	show:true,
+						    	start:0,
+						    	end:100,
+						    	bottom:20
+						    },
+						    legend: {
+						    	type: 'scroll',
+						    	y:'bottom',
+						    	x:'left',
+						        bottom: 0,
+						        data:this.selectMechines
+						    },
+						    grid: {
+						        left: '10px',
+						        right: '8%',
+						        bottom: '18%',
+						        top:'8%',
+						        hieght:'300px',
+						        containLabel: true
+						    },
+						    xAxis: {
+						    	type: 'time',
+	        					boundaryGap: false,
+						    },
+						    yAxis: {
+						    	type:'value',
+						    	scale:true,//纵坐标自适应，需type为value
+						        splitLine: {
+						            show: false
+						        }
+						    },
+						    series: yData
+					    };
+					    myChart.clear();
+					    myChart.setOption(option);
+					    tempObject.chart=myChart;
+					    //窗口变换，图resize
+					    window.addEventListener("resize", function () {
+					        myChart.resize();
+					    });
+
+					    //**************定时器,有问题******************
+					    //this.getnewDate(index,data,myChart,xData,yData)
+					}
+		        }.bind(this),function(){
+		        	console.log("fail")
+		        	tempObject.showLoading=false;
+					tempObject.showError=true;
+
+		        }.bind(this));
+			},
+			/*
+			getnewDate:function(index,data,myChart,xData,yData){
+				//定时器有问题，待优化
+				let ipArr = this.selectIps;
+				let currentItem = this.selectItems[index]
+				let timeInternal = 10;
+				if(data["type"]=='sec'){
+					timeInternal = 10;
+				}else if(data["type"]=='min' && data["type_num"] == '10'){
+					timeInternal = 600;
+				}else if(data["type"]=='min' && data["type_num"] == '20'){
+					timeInternal = 1200;
+				}else if(data["type"]=='min' && data["type_num"] == '30'){
+					timeInternal = 1800;
+				}else if(data["type"]=='hour'){
+					timeInternal = 3600;
+				}
+
+				var timer = setInterval(function () {
+					if(currentItem){
+						data["starttime"] = data["endtime"];
+						data["endtime"] = data["endtime"]+timeInternal;
+						
+						vueGetData.getData("gethbasedata",data,function(jsondata){
+				        	if(jsondata.body.length==0){
+				        		//console.log("数据为空")
+				        	}else{
+				        		//获取折线图横坐标数据
+				        		xData.shift();
+				        		for (var start=data["starttime"];start<=data["endtime"];start++){
+									var d = new Date(start * 1000);    //根据时间戳生成的时间对象
+									var time = (d.getMonth()+1) + "-" + 
+								           (d.getDate()) + " " + (d.getHours()) + ":" + 
+								           (d.getMinutes()) + ":" + 
+								           (d.getSeconds());
+								    xData.push(time);
+								}
+								//获取折线图纵坐标数据
+								var ips=[];
+								for (var i=0;i<ipArr.length;i++){
+									//对应ip
+									var ip=ipArr[i];
+									//ip对应接口数据
+									let resultData = jsondata.body[currentItem];
+									//接口数据转换为数组形式
+									for(var item in resultData[ip]){
+										var d = new Date(item * 1000);
+										var time = (d.getMonth()+1) + "-" + 
+								           (d.getDate()) + " " + (d.getHours()) + ":" + 
+								           (d.getMinutes()) + ":" + 
+								           (d.getSeconds());
+								        yData[i].data.shift()
+										yData[i].data.push([time,parseFloat(resultData[ip][item])])
+									}
+								}
+								myChart.setOption({
+							    	xAxis: {
+								    	type: 'category',
+			        					boundaryGap: false,
+			        					data: xData
+								    },
+							        series: yData
+							    });
+					        }
+				        }.bind(this),function(){
+
+				        }.bind(this));
+					}
+					else{
+						clearInterval(timer)
+					}
+				}, timeInternal*1000);
+			},
+			*/
+			getFormatDate:function(timestamp){
+				var date = new Date();
+			    date.setTime(timestamp * 1000);
+			    var y = date.getFullYear();
+			    var m = date.getMonth() + 1;
+			    m = m < 10 ? ('0' + m) : m;
+			    var d = date.getDate();
+			    d = d < 10 ? ('0' + d) : d;
+			    var h = date.getHours();
+			    h = h < 10 ? ('0' + h) : h;
+			    var minute = date.getMinutes();
+			    var second = date.getSeconds();
+			    minute = minute < 10 ? ('0' + minute) : minute;
+			    second = second < 10 ? ('0' + second) : second;
+			    return y + '-' + m + '-' + d+' '+h+':'+minute+':'+second;
+				// var date = new Date(timestamp * 1000);    //根据时间戳生成的时间对象
+				// let month = date.getMonth()+1;
+			 //    var currentdate = date.getFullYear() + "-" + month + "-" + date.getDate()
+			 //            + " " + date.getHours() + ":" + date.getMinutes()
+			 //            + ":" + date.getSeconds();
+			 //    return currentdate;
+			},
+			sureClick:function(){
+    			//获取当前时间
+				if(this.endTime-this.startTime<=0){
+					//获取当前时间
+	    			this.endTime = Date.parse(new Date())/1000;
+					this.value2 = this.getFormatDate(this.endTime)
+					this.startTime = Date.parse(new Date())/1000-3600;
+					this.value1 = this.getFormatDate(this.startTime)
+				}else if(this.endTime-this.startTime != 3600){
+					document.getElementById(this.currentTime).setAttribute("class","")
+					document.getElementById('oneHour').setAttribute("class","")
+					this.currentTime='oneHour';
+				}
+				this.getParams();
+			},
+
+			closeGraph:function(index){
+				let tempItem = this.selectItems[index]
+				this.selectItems.splice(index,1)
+
+				var items=document.getElementsByName("check-item");
+				var itemLen=items.length;
+				if(itemLen>0){
+                	for(var i=0;i<itemLen;i++){
+                		if(tempItem==vueGetData.trim(items[i].parentNode.parentNode.cells[1].innerText)){
+                			items[i].checked = false;
+                		}
+                	}
+                }
+                this.getParams();
+			}
+		},
+		created(){
+			//获取当前时间
+
+			this.endTime = Date.parse(new Date())/1000;
+			this.value2 = this.getFormatDate(this.endTime)
+			this.startTime = Date.parse(new Date())/1000-3600;
+			this.value1 = this.getFormatDate(this.startTime)
+		},
+		components: {
+			SideLeft,
+			'el-date-picker': DatePicker,
+		}
+	}
+</script>
+<style lang="less" >
+@import "../../Css/mixin.less";
+.el-input__icon+.el-input__inner {
+    padding-right: 35px;
+    width: 180px;
+}
+.el-input--small .el-input__inner {
+    height: 30px;
+    margin: 0px;
+    width: 140px;
+}
+.el-icon-caret-left{
+	cursor:pointer;
+}
+.el-icon-caret-right{
+	cursor:pointer;
+}
+.sideleftShow{
+	position: absolute;
+	margin-left: 240px;
+	width: 10px;
+	height:100%;
+	top:60%;
+}
+.sideleftUnShow{
+	position: absolute;
+	margin-left: 0px;
+	width: 10px;
+	height:100%;
+	top:60%;
+}
+.homeLeftShow {
+	position: absolute;
+	margin-left: 250px;
+	width: 100%-250px;
+	height:90%;
+	overflow-y: auto;
+}
+.homeLeftUnShow {
+	position: absolute;
+	margin-left: 10px;
+	width: 99%;
+	height:90%;
+	overflow-y: auto;
+}
+
+.topbox {
+	width: 100%;
+	overflow:hidden;
+	padding: 10px 0;
+	.selectbox {
+		width: 50%;
+		height: 300px;
+		padding: 0px 10px;
+
+		.title {
+		    display: block;
+		    position: relative;
+		    line-height: 40px;
+		    font-size: 16px;
+			padding-left: 10px;
+		    color: #6d6d6d;
+			background: #fff;
+			margin-bottom: 8px;
+
+		    #searchItem {
+				float: right;
+				height: 27px;
+				width: 200px;
+				font-size: 15px;
+				font-weight: normal;
+				border: 1px solid #e6e6e6;
+				margin-top: 7px;
+			}
+			#searchI {
+				position: absolute;
+				top: 10px;
+				right: 20px;
+				width: 20px;
+				height: 20px;
+				background:url(@searchico) no-repeat;
+				background-size:20px;
+				cursor:pointer;
+			}
+		}
+	}
+}
+
+.content {
+	width: 100%;
+	height: 260px;
+	background-color:#fcfcfc;
+}
+
+.contentHead {
+	height: 40px;
+	background-color: #fff;
+	position: relative;
+	@h: 27px;
+	line-height: @h;
+	padding: 6px 0;
+	font-size: 15px;
+	cursor:pointer;
+
+	#searchMechine {
+		float:left;
+		height: @h;
+		width: 200px;
+		border: 1px solid #e6e6e6;
+	}
+	#searchM {
+		position: absolute;
+		top: 10px;
+		left: 180px;
+		width: 20px;
+		height: 20px;
+		background:url(@searchico) no-repeat;
+		background-size:20px;
+		cursor:pointer;
+	}
+
+	li {
+		display: inline;
+		color: #3f3f3f;
+		margin:0 1%;
+	}
+}
+
+.itemOpertor{
+	font-size: 15px;
+	margin:0 1%;
+	position:absolute;
+	right: 210px;
+}
+
+.contentTable{
+	height:210px;
+	overflow-y:auto;
+	tr {
+		border-bottom: 0;
+		background: #f8f8f8;
+	}
+	td{
+		height:35px;
+		line-height:35px;
+		font-size:14px;
+		color: #666;
+	}
+	tr:nth-child(2n){
+		background: #fff;
+	}
+}
+
+.graphbox {
+	margin: 10px;
+	font-size: 15px;
+	color: #fff;
+
+	.boxHead{
+		height: 50px;
+		background-color: #fff;
+		line-height: 50px;
+		color: #3f3f3f;
+	}
+	li {
+		display: inline;
+		margin:0 10px;
+		input{
+			border: 1px solid #e6e6e6;
+		}
+		&.cur {
+			color: #2bc8f2;
+		}
+	}
+}
+
+.graph{
+	position: relative;
+	float:left;
+	width:48.5% !important;
+	margin-left:1%;
+	margin-bottom:10px;
+
+	border: 1px solid #ddd;
+	border-radius: 5px;
+
+	.graphHead {
+		position: absolute;
+		top: 0;
+		right: 0;
+		cursor: pointer;
+		border-radius: 5px;
+		width: 50px;
+		height: 50px;
+		z-index: 100;
+
+		&:after,&:before{
+		    content: "";
+		    position: absolute;
+		    width: 2px;
+		    height: 13px;
+		    background: #bbbbbb;
+		    font-size:0; 
+		    line-height:0;
+		    vertical-align:middle;
+		    transform: rotate(45deg);
+		    -webkit-transform: rotate(45deg);
+		    transform-origin: 50% 50%;
+		    -webkit-transform-origin: 50% 50%;
+		    left: 24px;
+		    top: 18px;
+		}
+		&:after{
+			-webkit-transform: rotate(-45deg);
+		}
+	}
+
+	.graphBody{
+		height:300px;
+		width:98%;
+		margin:1%;
+		float:left;
+		border: 1px solid #aaa;
+	}
+	.graphFoot{
+		margin:1%;
+		a {
+		    color: #2534f7;
+		    text-decoration: underline;
+		    outline: none;
+		    background: none;
+		}
+
+		table {
+		    table-layout: fixed;
+		    width: 100%;
+		    text-align: left;
+		    border-collapse: collapse;
+		    border-spacing: 0;
+		    font-size: 13px !important
+		}
+		table>thead {
+		    height: 30px;
+		}
+		table>thead>tr>th {
+		    height: 30px;
+		    line-height: 30px;
+		    padding: 0 10px;
+		    font-weight:bold;
+		    text-overflow: ellipsis;
+		    overflow: hidden
+		}
+		table>tbody>tr {
+		    border-top: 1px solid #e9e9e9
+		}
+		table>tbody>tr>td {
+		    height: 30px;
+		    line-height: 30px;
+		    padding: 0 10px;
+		    word-break: break-all;
+		    overflow: hidden;
+		    white-space: nowrap;
+		    text-overflow: ellipsis
+		}
+	}
+}
+
+.button {
+    height: 30px;
+    padding: 0 10px;
+    line-height: 28px;
+    background-color: #2bc8f2;
+    border-radius: 3px;
+    color: #fff;
+    font-size: 13px;
+    display: inline-block;
+    border: 1px solid #2bc8f2;
+    position: relative;
+    cursor:pointer;
+}
+.button:hover, .button:focus {
+    color: #fff
+}
+
+.cur{
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+.loading{
+	height:100px;
+	width:100px;
+	clear: both; 
+	display: block; 
+	margin:auto; 
+	margin-top:100px; 
+}
+.error{
+	width:400px;
+	font-size:20px;
+	clear: both; 
+	display: block; 
+	margin:auto; 
+	margin-top:100px; 
+}
+
+</style>
