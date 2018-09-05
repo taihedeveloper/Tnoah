@@ -176,3 +176,6 @@ __[注]__ __BUS_TAgent_Heartbeat是一条用来探活的采集项__
 ![alarm_detail](doc/img/alarm_detail.png )
   
 __[注]__ __所有业务类采集项的报警策略中,报警阈值要乘以10(以一秒钟的值作为单位)__
+
+更多详细介绍&实现原理：
+https://github.com/taihedeveloper/Tnoah/blob/master/doc/Introduce.md
