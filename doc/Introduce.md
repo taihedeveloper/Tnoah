@@ -78,6 +78,7 @@ judge模块和alarm模块是基于open-falcon项目中judge、alarm模块的二�
 由于redis容量有限, 我们会通过一些离线脚本, 定时把redis中的数据"搬"至ssdb。
 相应的, Tnoah web的获取数据接口在读数据时, 也会对时间范围做判断, 一定时间内的数据会从redis中读取, 而较久的数会从ssdb读取, 如果请求的时间刚好包含这两部分时间, 则会分别从redis和ssdb中读取, 并对读取到的数据做合并。
 
-
+### 尾巴
+Tnoah项目主页 & 说明文档：https://github.com/taihedeveloper/Tnoah
 
 
